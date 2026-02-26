@@ -1,6 +1,4 @@
- https://ai.studio/apps/a158e8f6-cd27-4326-91c8-8eae76efc6d3
-
-## Run Locally
+#Run Locally
 
 **Prerequisites:**  Node.js
 
