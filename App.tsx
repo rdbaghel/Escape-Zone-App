@@ -10,6 +10,30 @@ import ChatInterface from './components/ChatInterface';
 const GENRES = ['All', 'Action', 'Comedy', 'Drama', 'Sci-Fi', 'Horror', 'Romance', 'Thriller', 'Animation'];
 const YEARS = ['All', '2025', '2024', '2023', '2022', '2021', '2020', '2010s', '2000s'];
 
+const Logo = ({ size = "md" }: { size?: "xs" | "sm" | "md" | "lg" }) => {
+  const dimensions = size === "xs" ? "w-8 h-8" : size === "sm" ? "w-10 h-10" : size === "md" ? "w-14 h-14" : "w-32 h-32";
+  const fontSize = size === "xs" ? "text-sm" : size === "sm" ? "text-xl" : size === "md" ? "text-3xl" : "text-7xl";
+  
+  return (
+    <div className={`${dimensions} bg-gradient-to-br from-slate-50 via-slate-300 to-slate-400 rounded-[22%] flex items-center justify-center shadow-2xl relative overflow-hidden border border-white/40 group`}>
+      {/* Glossy Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none" />
+      
+      <div className="relative flex items-center justify-center w-full h-full">
+        <span className={`${fontSize} font-black text-blue-600 absolute -translate-x-[15%] -translate-y-[10%] drop-shadow-md transition-transform duration-500 group-hover:scale-110`}>E</span>
+        <span className={`${fontSize} font-black text-blue-800 absolute translate-x-[15%] translate-y-[10%] drop-shadow-md transition-transform duration-500 group-hover:scale-110`}>Z</span>
+      </div>
+      
+      {/* Shine effect */}
+      <motion.div 
+        animate={{ x: ['-100%', '200%'] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 2 }}
+        className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12"
+      />
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   const [activeSection, setActiveSection] = useState<AppSection>(AppSection.RECOMMENDATIONS);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -23,7 +47,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Extended loading for aesthetic intro sequence
-    const timer = setTimeout(() => setIsInitialLoading(false), 8000);
+    const timer = setTimeout(() => setIsInitialLoading(false), 15000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -64,12 +88,15 @@ const App: React.FC = () => {
         className="relative group w-full flex flex-col items-center py-6 gap-2"
       >
         {isActive && (
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-indigo-500 rounded-r-full shadow-[0_0_20px_rgba(99,102,241,0.8)]" />
+          <motion.div 
+            layoutId="activeNavIndicator"
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-gradient-to-b from-indigo-400 to-indigo-600 rounded-r-full shadow-[0_0_20px_rgba(99,102,241,0.8)]" 
+          />
         )}
         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl transition-all duration-500 ${
           isActive 
-            ? 'bg-indigo-600 text-white scale-110 shadow-2xl shadow-indigo-600/50' 
-            : 'bg-slate-800/50 text-slate-500 group-hover:bg-slate-700/80 group-hover:text-slate-300'
+            ? 'bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 text-white scale-110 shadow-[0_10px_30px_rgba(99,102,241,0.5)]' 
+            : 'bg-slate-800/50 text-slate-500 group-hover:bg-slate-700/80 group-hover:text-slate-300 group-hover:scale-105'
         }`}>
           {icon}
         </div>
@@ -87,7 +114,11 @@ const App: React.FC = () => {
       onClick={() => setActiveSection(section)}
       className="flex flex-col items-center gap-1 group"
     >
-      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl transition-all duration-300 shadow-xl ${activeSection === section ? 'bg-indigo-600 text-white scale-110' : 'bg-slate-800 text-slate-400 group-hover:bg-slate-700'}`}>
+      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl transition-all duration-300 shadow-xl ${
+        activeSection === section 
+          ? 'bg-gradient-to-br from-indigo-500 to-violet-600 text-white scale-110 shadow-indigo-500/40' 
+          : 'bg-slate-800 text-slate-400 group-hover:bg-slate-700'
+      }`}>
         {icon}
       </div>
       <span className={`text-[10px] font-bold uppercase tracking-tighter ${activeSection === section ? 'text-indigo-400' : 'text-slate-500'}`}>{label}</span>
@@ -123,8 +154,8 @@ const App: React.FC = () => {
                     initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
                     animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     transition={{ 
-                      delay: 0.5 + (i * 0.15), 
-                      duration: 0.8,
+                      delay: 1.5 + (i * 0.25), 
+                      duration: 1.2,
                       ease: [0.2, 0.65, 0.3, 0.9]
                     }}
                     className={`text-5xl md:text-7xl font-black text-white tracking-tighter inline-block ${char === ' ' ? 'mx-4' : ''}`}
@@ -139,54 +170,150 @@ const App: React.FC = () => {
                 initial={{ scale: 0, opacity: 0, rotate: -20 }}
                 animate={{ scale: 1, opacity: 1, rotate: 0 }}
                 transition={{ 
-                  delay: 3.5, 
-                  duration: 1.2, 
+                  delay: 6.5, 
+                  duration: 1.5, 
                   type: "spring", 
                   damping: 15 
                 }}
-                className="relative"
+                className="relative flex items-center justify-center"
               >
+                {/* Main Logo Container */}
                 <motion.div 
                   animate={{ 
-                    boxShadow: ["0 0 20px rgba(99,102,241,0.3)", "0 0 60px rgba(99,102,241,0.6)", "0 0 20px rgba(99,102,241,0.3)"]
+                    boxShadow: ["0 0 20px rgba(148,163,184,0.3)", "0 0 60px rgba(148,163,184,0.6)", "0 0 20px rgba(148,163,184,0.3)"]
                   }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="w-32 h-32 bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-800 rounded-[2.5rem] flex items-center justify-center text-white font-black text-5xl shadow-2xl"
+                  className="z-10 relative"
                 >
-                  E
+                  <Logo size="lg" />
                 </motion.div>
                 
+                {/* Orbital Rings */}
                 <motion.div 
                   animate={{ rotate: 360 }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                  className="absolute -inset-6 border-2 border-indigo-500/10 border-t-indigo-500 rounded-full"
+                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  className="absolute -inset-8 border-2 border-indigo-500/10 border-t-indigo-500/40 rounded-full"
                 />
                 <motion.div 
                   animate={{ rotate: -360 }}
-                  transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-                  className="absolute -inset-10 border border-cyan-500/5 border-b-cyan-500/30 rounded-full"
+                  transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                  className="absolute -inset-14 border border-cyan-500/5 border-b-cyan-500/20 rounded-full"
                 />
+
+                {/* Cinema Icons floating around the logo - Positioned carefully to not overlap */}
+                <motion.div 
+                  initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
+                  animate={{ 
+                    opacity: 1, 
+                    x: -120, 
+                    y: -100, 
+                    scale: 1,
+                    translateY: [0, -10, 0]
+                  }}
+                  transition={{ 
+                    opacity: { delay: 8, duration: 1 },
+                    x: { delay: 8, duration: 1.5, type: "spring" },
+                    y: { delay: 8, duration: 1.5, type: "spring" },
+                    scale: { delay: 8, duration: 1.5, type: "spring" },
+                    translateY: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+                  }}
+                  className="absolute text-4xl drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] z-20"
+                >🎬</motion.div>
+                
+                <motion.div 
+                  initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
+                  animate={{ 
+                    opacity: 1, 
+                    x: 120, 
+                    y: -100, 
+                    scale: 1,
+                    translateY: [0, 10, 0]
+                  }}
+                  transition={{ 
+                    opacity: { delay: 8.3, duration: 1 },
+                    x: { delay: 8.3, duration: 1.5, type: "spring" },
+                    y: { delay: 8.3, duration: 1.5, type: "spring" },
+                    scale: { delay: 8.3, duration: 1.5, type: "spring" },
+                    translateY: { duration: 3.5, repeat: Infinity, ease: "easeInOut" }
+                  }}
+                  className="absolute text-4xl drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] z-20"
+                >🎥</motion.div>
+                
+                <motion.div 
+                  initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
+                  animate={{ 
+                    opacity: 1, 
+                    x: -120, 
+                    y: 100, 
+                    scale: 1,
+                    translateY: [0, -15, 0]
+                  }}
+                  transition={{ 
+                    opacity: { delay: 8.6, duration: 1 },
+                    x: { delay: 8.6, duration: 1.5, type: "spring" },
+                    y: { delay: 8.6, duration: 1.5, type: "spring" },
+                    scale: { delay: 8.6, duration: 1.5, type: "spring" },
+                    translateY: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+                  }}
+                  className="absolute text-4xl drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] z-20"
+                >🍿</motion.div>
+                
+                <motion.div 
+                  initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
+                  animate={{ 
+                    opacity: 1, 
+                    x: 120, 
+                    y: 100, 
+                    scale: 1,
+                    translateY: [0, 15, 0]
+                  }}
+                  transition={{ 
+                    opacity: { delay: 8.9, duration: 1 },
+                    x: { delay: 8.9, duration: 1.5, type: "spring" },
+                    y: { delay: 8.9, duration: 1.5, type: "spring" },
+                    scale: { delay: 8.9, duration: 1.5, type: "spring" },
+                    translateY: { duration: 4.5, repeat: Infinity, ease: "easeInOut" }
+                  }}
+                  className="absolute text-4xl drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] z-20"
+                >🎞️</motion.div>
               </motion.div>
 
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 5, duration: 1 }}
-                className="mt-16 text-center"
+                transition={{ delay: 10, duration: 1.5 }}
+                className="mt-16 text-center space-y-4"
               >
-                <div className="flex items-center gap-3 justify-center mb-4">
+                <div className="flex flex-col items-center gap-2 justify-center">
                   <motion.div 
-                    animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                    className="w-2 h-2 bg-emerald-500 rounded-full"
-                  />
-                  <p className="text-slate-400 text-xs font-black uppercase tracking-[0.4em]">Neural Core Synchronized</p>
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 11, duration: 1 }}
+                    className="px-6 py-2 bg-indigo-600/20 border border-indigo-500/30 rounded-full backdrop-blur-md"
+                  >
+                    <p className="text-indigo-400 text-xs font-black uppercase tracking-[0.4em]">Created by <span className="text-white">Dev Baghel</span></p>
+                  </motion.div>
+                  
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 12, duration: 1.5, type: "spring" }}
+                    className="relative"
+                  >
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 font-serif italic text-2xl tracking-widest">for Cinephile</span>
+                    <motion.div 
+                      animate={{ scaleX: [0, 1, 0] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                      className="absolute -bottom-1 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
+                    />
+                  </motion.div>
                 </div>
-                <div className="w-48 h-1 bg-slate-900 rounded-full overflow-hidden mx-auto">
+                
+                <div className="w-48 h-1 bg-slate-900 rounded-full overflow-hidden mx-auto mt-8">
                   <motion.div 
                     initial={{ x: "-100%" }}
                     animate={{ x: "100%" }}
-                    transition={{ delay: 5, duration: 2.5, ease: "easeInOut" }}
+                    transition={{ delay: 10, duration: 5, ease: "easeInOut" }}
                     className="w-full h-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent"
                   />
                 </div>
@@ -226,10 +353,10 @@ const App: React.FC = () => {
       {/* Desktop Left Sidebar Navigation */}
       <aside className="hidden md:flex fixed left-0 top-0 h-full w-28 bg-slate-950/80 backdrop-blur-2xl border-r border-white/5 flex-col py-8 z-[70] items-center">
         <div 
-          className="w-14 h-14 bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-800 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-indigo-500/30 mb-12 cursor-pointer hover:rotate-6 transition-transform"
+          className="mb-12 cursor-pointer hover:rotate-6 transition-transform"
           onClick={() => setActiveSection(AppSection.RECOMMENDATIONS)}
         >
-          E
+          <Logo size="md" />
         </div>
 
         <div className="flex-1 w-full space-y-4">
@@ -254,7 +381,7 @@ const App: React.FC = () => {
         <header className="sticky top-0 z-[60] bg-slate-950/70 backdrop-blur-xl border-b border-white/5">
           <div className="container mx-auto px-6 h-20 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden">
-              <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black">E</div>
+              <Logo size="sm" />
               <div className="flex flex-col">
                 <span className="text-lg font-extrabold text-white tracking-tight leading-none">Escape Zone</span>
                 <span className="text-[8px] font-bold text-indigo-400 uppercase tracking-widest">by Dev Baghel</span>
@@ -305,7 +432,7 @@ const App: React.FC = () => {
                     <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight leading-tight">
                       <span className="text-indigo-500">Binge-worthy</span><br />Masterpieces
                     </h1>
-                    <p className="text-slate-400 text-lg leading-relaxed">All your favourite and top rated entertainment selection of cinema, series, and anime tailored for the connoisseur. All is here escape the reality and free your mind. Hope you will have good time. Enjoy cinema 🎥 along with career advice 👨🏻💻</p>
+                    <p className="text-slate-400 text-lg leading-relaxed">A curated sanctuary for the modern connoisseur. Escape reality through elite cinema, series, and anime, while future-proofing your professional path with intelligent AI career assistance.</p>
                   </div>
                   
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
@@ -314,7 +441,11 @@ const App: React.FC = () => {
                         <button
                           key={cat}
                           onClick={() => { setCategory(cat); setSelectedGenre('All'); setSelectedYear('All'); }}
-                          className={`px-5 py-2.5 rounded-xl text-sm font-extrabold transition-all ${category === cat ? 'bg-indigo-600 text-white shadow-indigo-500/20 shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
+                          className={`px-5 py-2.5 rounded-xl text-sm font-extrabold transition-all duration-300 ${
+                            category === cat 
+                              ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-[0_5px_20px_rgba(99,102,241,0.4)] scale-105' 
+                              : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                          }`}
                         >
                           {cat}
                         </button>
@@ -328,8 +459,8 @@ const App: React.FC = () => {
                         placeholder={`Search ${category}...`}
                         className="bg-slate-900/80 border border-white/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full text-white shadow-xl backdrop-blur-sm"
                       />
-                      <button type="submit" className="absolute right-4 top-3 text-slate-500 hover:text-indigo-400 transition-colors">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                      <button type="submit" className="absolute right-2 top-2 p-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-all shadow-lg active:scale-90">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                       </button>
                     </form>
                   </div>
@@ -347,7 +478,11 @@ const App: React.FC = () => {
                         <button
                           key={g}
                           onClick={() => setSelectedGenre(g)}
-                          className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${selectedGenre === g ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400' : 'bg-slate-800/50 border-white/10 text-slate-400 hover:border-slate-600'}`}
+                          className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 border ${
+                            selectedGenre === g 
+                              ? 'bg-gradient-to-r from-indigo-500/20 to-violet-500/20 border-indigo-500 text-indigo-300 shadow-[0_0_15px_rgba(99,102,241,0.2)]' 
+                              : 'bg-slate-800/50 border-white/10 text-slate-400 hover:border-slate-500 hover:bg-slate-800'
+                          }`}
                         >
                           {g}
                         </button>
@@ -364,7 +499,11 @@ const App: React.FC = () => {
                         <button
                           key={y}
                           onClick={() => setSelectedYear(y)}
-                          className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${selectedYear === y ? 'bg-cyan-600/20 border-cyan-500 text-cyan-400' : 'bg-slate-800/50 border-white/10 text-slate-400 hover:border-slate-600'}`}
+                          className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 border ${
+                            selectedYear === y 
+                              ? 'bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 border-cyan-500 text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.2)]' 
+                              : 'bg-slate-800/50 border-white/10 text-slate-400 hover:border-slate-500 hover:bg-slate-800'
+                          }`}
                         >
                           {y}
                         </button>
@@ -389,10 +528,50 @@ const App: React.FC = () => {
                   </div>
                 )}
 
+                {loading && (
+                  <motion.div 
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 2, ease: "easeInOut" }}
+                    className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-cyan-500 to-indigo-500 z-[100] origin-left"
+                  />
+                )}
+
                 {loading ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {[...Array(6)].map((_, i) => (
-                      <div key={i} className="bg-slate-900/50 border border-white/5 rounded-3xl h-80 animate-pulse"></div>
+                      <motion.div 
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="bg-slate-900/40 border border-white/5 rounded-[2.5rem] h-[450px] overflow-hidden relative"
+                      >
+                        <div className="h-64 bg-slate-800/50 relative overflow-hidden">
+                          <div className="absolute inset-0 skeleton-shimmer"></div>
+                        </div>
+                        <div className="p-8 space-y-4">
+                          <div className="h-8 w-3/4 bg-slate-800/50 rounded-xl relative overflow-hidden">
+                            <div className="absolute inset-0 skeleton-shimmer"></div>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="h-4 w-full bg-slate-800/50 rounded-lg relative overflow-hidden">
+                              <div className="absolute inset-0 skeleton-shimmer"></div>
+                            </div>
+                            <div className="h-4 w-5/6 bg-slate-800/50 rounded-lg relative overflow-hidden">
+                              <div className="absolute inset-0 skeleton-shimmer"></div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 pt-4">
+                            <div className="h-10 w-24 bg-slate-800/50 rounded-2xl relative overflow-hidden">
+                              <div className="absolute inset-0 skeleton-shimmer"></div>
+                            </div>
+                            <div className="h-10 w-24 bg-slate-800/50 rounded-2xl relative overflow-hidden">
+                              <div className="absolute inset-0 skeleton-shimmer"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
                     ))}
                   </div>
                 ) : (
@@ -454,11 +633,11 @@ const App: React.FC = () => {
         <footer className="bg-slate-950 border-t border-white/5 py-12 relative z-10 overflow-hidden mt-auto">
           <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-               <div className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center text-white font-bold text-sm">E</div>
+               <Logo size="xs" />
                <span className="text-slate-400 font-bold text-sm">Escape Zone Guide</span>
             </div>
             <div className="text-slate-500 text-xs font-medium">
-              &copy; 2025 Escape Zone Ecosystem &bull; Driven by Gemini Intelligence
+              &copy; 2025 Escape Zone Ecosystem &bull; Copyright belong to Rahul Dev Bagel
             </div>
             <div className="flex gap-4">
               <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></div>

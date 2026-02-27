@@ -24,7 +24,7 @@ const RecommendationCard: React.FC<Props> = ({ item }) => {
   };
 
   const imageUrl = item.imageUrl && item.imageUrl.startsWith('http') 
-    ? `${item.imageUrl}${item.imageUrl.includes('?') ? '&' : '?'}auto=format&fit=crop&w=1200&q=80` 
+    ? `${item.imageUrl}${item.imageUrl.includes('?') ? '&' : '?'}auto=format&fit=crop&w=800&q=70` 
     : getFallbackImage();
 
   return (
@@ -39,35 +39,53 @@ const RecommendationCard: React.FC<Props> = ({ item }) => {
           imageLoaded ? 'hover:border-indigo-500/50 cursor-pointer active:scale-[0.98]' : 'cursor-default'
         }`}
       >
-        {!imageLoaded && (
-          <div className="absolute inset-0 z-20 flex flex-col pointer-events-none">
-            <div className="h-64 shimmer relative overflow-hidden">
-               <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-10 h-10 border-4 border-white/5 border-t-indigo-500 rounded-full animate-spin"></div>
-               </div>
-            </div>
-            <div className="p-8 flex-1 space-y-4 bg-slate-900/40">
-              <div className="h-8 w-3/4 shimmer rounded-xl"></div>
-              <div className="space-y-2">
-                <div className="h-4 w-full shimmer rounded-lg"></div>
-                <div className="h-4 w-5/6 shimmer rounded-lg"></div>
+        <AnimatePresence>
+          {!imageLoaded && (
+            <motion.div 
+              key="skeleton"
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="absolute inset-0 z-20 flex flex-col pointer-events-none bg-slate-950"
+            >
+              <div className="h-64 skeleton-shimmer relative overflow-hidden">
+                 <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-10 h-10 border-2 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin"></div>
+                 </div>
               </div>
-              <div className="flex gap-2 pt-4">
-                <div className="h-6 w-16 shimmer rounded-lg"></div>
-                <div className="h-6 w-20 shimmer rounded-lg"></div>
+              <div className="p-8 flex-1 space-y-6 bg-slate-900/40">
+                <div className="space-y-3">
+                  <div className="h-8 w-3/4 skeleton-shimmer rounded-xl"></div>
+                  <div className="h-4 w-1/4 skeleton-shimmer rounded-lg"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-4 w-full skeleton-shimmer rounded-lg"></div>
+                  <div className="h-4 w-5/6 skeleton-shimmer rounded-lg"></div>
+                  <div className="h-4 w-4/6 skeleton-shimmer rounded-lg"></div>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <div className="h-10 w-28 skeleton-shimmer rounded-2xl"></div>
+                  <div className="h-10 w-28 skeleton-shimmer rounded-2xl"></div>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <div className={`flex flex-col h-full transition-all duration-500 ease-out ${
-          imageLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+        <div className={`flex flex-col h-full transition-all duration-700 ease-in-out ${
+          imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.98] blur-sm'
         }`}>
           <div className="relative h-64 overflow-hidden bg-slate-800">
             <img 
               src={imageUrl} 
               alt={item.title}
               onLoad={() => setImageLoaded(true)}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (!target.src.includes('images.unsplash.com/photo-1485846234645-a62644f84728')) {
+                  target.src = 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=800&q=70';
+                }
+              }}
               loading="lazy"
               className={`w-full h-full object-cover transition-transform duration-700 ease-out ${
                 imageLoaded ? 'group-hover:scale-105' : ''
@@ -137,7 +155,7 @@ const RecommendationCard: React.FC<Props> = ({ item }) => {
               <div className="flex items-center gap-2">
                 <button 
                   onClick={toggleModal}
-                  className="p-2.5 rounded-2xl bg-slate-800/50 text-slate-400 hover:bg-slate-700 hover:text-white border border-white/5 transition-all"
+                  className="p-2.5 rounded-2xl bg-slate-800/50 text-slate-400 hover:bg-slate-700 hover:text-white hover:scale-110 border border-white/5 transition-all duration-300 active:scale-95"
                   aria-label="View Details"
                 >
                   <Info className="w-5 h-5" />
@@ -147,7 +165,7 @@ const RecommendationCard: React.FC<Props> = ({ item }) => {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="p-2.5 rounded-2xl bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white border border-red-500/20 transition-all flex items-center justify-center"
+                  className="p-2.5 rounded-2xl bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white hover:scale-110 border border-red-500/20 transition-all duration-300 flex items-center justify-center active:scale-95 shadow-[0_0_15px_rgba(220,38,38,0.1)] hover:shadow-[0_0_20px_rgba(220,38,38,0.4)]"
                   aria-label="Watch on YouTube"
                 >
                   <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
@@ -156,7 +174,7 @@ const RecommendationCard: React.FC<Props> = ({ item }) => {
                 </a>
                 <button 
                   onClick={toggleTrailer}
-                  className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-2xl shadow-lg shadow-indigo-600/20 transition-all active:scale-95 group/trailer-btn"
+                  className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white px-5 py-2.5 rounded-2xl shadow-[0_5px_15px_rgba(99,102,241,0.3)] transition-all active:scale-95 group/trailer-btn hover:scale-105"
                   aria-label={`Play trailer for ${item.title}`}
                 >
                   <Play className="w-4 h-4 fill-current" />
@@ -239,7 +257,7 @@ const RecommendationCard: React.FC<Props> = ({ item }) => {
                 <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                   <button 
                     onClick={toggleTrailer}
-                    className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-2xl transition-all duration-300 font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-indigo-500/30 flex items-center justify-center gap-3"
+                    className="flex-1 sm:flex-none bg-gradient-to-r from-indigo-600 to-violet-700 hover:from-indigo-500 hover:to-violet-600 text-white px-8 py-4 rounded-2xl transition-all duration-300 font-black uppercase tracking-[0.2em] text-[10px] shadow-[0_10px_30px_rgba(99,102,241,0.3)] hover:shadow-[0_15px_40px_rgba(99,102,241,0.5)] flex items-center justify-center gap-3 active:scale-95 hover:scale-105"
                   >
                     <Play className="w-4 h-4 fill-current" />
                     In-App Trailer
@@ -248,7 +266,7 @@ const RecommendationCard: React.FC<Props> = ({ item }) => {
                     href={item.trailerUrl.replace('/embed/', '/watch?v=')}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 sm:flex-none bg-red-600 hover:bg-red-500 text-white px-8 py-4 rounded-2xl transition-all duration-300 font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-red-500/30 flex items-center justify-center gap-3"
+                    className="flex-1 sm:flex-none bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white px-8 py-4 rounded-2xl transition-all duration-300 font-black uppercase tracking-[0.2em] text-[10px] shadow-[0_10px_30px_rgba(220,38,38,0.3)] hover:shadow-[0_15px_40px_rgba(220,38,38,0.5)] flex items-center justify-center gap-3 active:scale-95 hover:scale-105"
                   >
                     <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                       <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
@@ -258,7 +276,7 @@ const RecommendationCard: React.FC<Props> = ({ item }) => {
                 </div>
                 <button 
                   onClick={toggleModal}
-                  className="w-full sm:w-auto bg-white hover:bg-slate-200 text-slate-950 px-8 py-4 rounded-2xl transition-all duration-300 font-black uppercase tracking-[0.2em] text-[10px] shadow-xl"
+                  className="w-full sm:w-auto bg-white hover:bg-slate-200 text-slate-950 px-8 py-4 rounded-2xl transition-all duration-300 font-black uppercase tracking-[0.2em] text-[10px] shadow-xl active:scale-95 hover:scale-105"
                 >
                   Close
                 </button>

@@ -70,10 +70,13 @@ const ChatInterface: React.FC = () => {
         ))}
         {isTyping && (
           <div className="flex justify-start">
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-none p-3 flex gap-1">
-              <div className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce"></div>
-              <div className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-              <div className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/5 rounded-2xl rounded-tl-none p-4 flex items-center gap-3">
+              <div className="flex gap-1">
+                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce"></div>
+                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+              </div>
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Assistant is thinking</span>
             </div>
           </div>
         )}
@@ -92,7 +95,7 @@ const ChatInterface: React.FC = () => {
           <button 
             onClick={handleSend}
             disabled={isTyping || !input.trim()}
-            className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-4 py-2 rounded-xl transition-colors font-medium text-sm"
+            className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 disabled:from-slate-700 disabled:to-slate-700 text-white px-6 py-2 rounded-xl transition-all duration-300 font-bold text-sm shadow-[0_5px_15px_rgba(99,102,241,0.2)] active:scale-95"
           >
             Send
           </button>

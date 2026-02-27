@@ -77,14 +77,14 @@ const AdviceSection: React.FC = () => {
                   setSelectedTopic(topic.id);
                   handleFetchAdvice(topic.title);
                 }}
-                className={`bg-slate-900/40 border p-6 rounded-[2rem] text-left transition-all group relative overflow-hidden ${getColorClass(topic.color)}`}
+                className={`bg-slate-900/40 border p-6 rounded-[2rem] text-left transition-all group relative overflow-hidden active:scale-95 hover:scale-[1.02] ${getColorClass(topic.color)}`}
               >
-                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full transform translate-x-8 -translate-y-8 group-hover:translate-x-4 group-hover:-translate-y-4 transition-transform duration-500"></div>
-                <div className="text-5xl mb-6 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500 inline-block">{topic.icon}</div>
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/10 to-transparent rounded-bl-full transform translate-x-8 -translate-y-8 group-hover:translate-x-4 group-hover:-translate-y-4 transition-transform duration-500"></div>
+                <div className="text-5xl mb-6 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500 inline-block drop-shadow-2xl">{topic.icon}</div>
                 <h3 className="text-xl font-extrabold text-white mb-3 group-hover:text-indigo-400 transition-colors">{topic.title}</h3>
                 <p className="text-slate-400 text-sm leading-relaxed">{topic.description}</p>
                 <div className="mt-6 flex items-center text-xs font-bold text-slate-500 uppercase tracking-widest group-hover:text-white transition-colors">
-                  Explore Roadmap <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                  Explore Roadmap <span className="ml-2 group-hover:translate-x-2 transition-transform">→</span>
                 </div>
               </motion.button>
             ))}
@@ -100,9 +100,10 @@ const AdviceSection: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
             <button 
               onClick={() => setSelectedTopic(null)}
-              className="text-slate-400 hover:text-white flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] transition-all group"
+              className="text-slate-400 hover:text-white flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] transition-all group active:scale-95"
             >
-              <span className="bg-slate-800 p-2 rounded-lg group-hover:bg-indigo-600 transition-colors">←</span> Back to Topics
+              <span className="bg-slate-800 p-2.5 rounded-xl group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] transition-all">←</span> 
+              <span>Back to Topics</span>
             </button>
             
             <div className="flex items-center gap-4">
@@ -114,13 +115,30 @@ const AdviceSection: React.FC = () => {
           </div>
           
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-32 space-y-8">
-              <div className="relative w-20 h-20">
-                <div className="absolute inset-0 border-[6px] border-indigo-500/10 rounded-full"></div>
-                <div className="absolute inset-0 border-[6px] border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="flex flex-col items-center justify-center py-32 space-y-10">
+              <div className="relative">
+                <motion.div 
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  className="w-24 h-24 border-2 border-indigo-500/10 border-t-indigo-500 rounded-full"
+                />
+                <motion.div 
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-[-12px] border border-cyan-500/5 border-b-cyan-500/30 rounded-full"
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                </div>
               </div>
               <div className="text-center">
-                <p className="text-white font-black text-xl mb-2 tracking-tight">AI Neural Synthesis</p>
+                <motion.p 
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="text-white font-black text-xl mb-2 tracking-tight"
+                >
+                  AI Neural Synthesis
+                </motion.p>
                 <p className="text-slate-500 text-sm font-medium">Drafting your personalized career path...</p>
               </div>
             </div>
