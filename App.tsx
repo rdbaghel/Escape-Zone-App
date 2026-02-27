@@ -47,9 +47,17 @@ const App: React.FC = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    // Extended loading for aesthetic intro sequence - Reduced by 2s as requested
+    // Check for saved user info
+    const savedUser = localStorage.getItem('nexus_user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+      setIsAuthenticated(true);
+    }
+
+    // Extended loading for aesthetic intro sequence
     const timer = setTimeout(() => setIsInitialLoading(false), 13000);
     return () => clearTimeout(timer);
   }, []);
@@ -57,6 +65,13 @@ const App: React.FC = () => {
   const handleLogin = (userData: any) => {
     setUser(userData);
     setIsAuthenticated(true);
+    localStorage.setItem('nexus_user', JSON.stringify(userData));
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('nexus_user');
   };
 
   const fetchRecommendations = async (cat: string, query?: string, genre?: string, year?: string) => {
@@ -91,50 +106,38 @@ const App: React.FC = () => {
   const NavItem = ({ icon, label, section }: { icon: string, label: string, section: AppSection }) => {
     const isActive = activeSection === section;
     return (
-      <button 
+      <motion.button 
+        whileHover={{ x: 4 }}
+        whileTap={{ scale: 0.98 }}
         onClick={() => setActiveSection(section)}
-        className="relative group w-full flex flex-col items-center py-6 gap-2"
+        className="relative group w-full flex items-center p-3 gap-4 rounded-xl transition-all duration-300 hover:bg-white/5"
       >
         {isActive && (
           <motion.div 
             layoutId="activeNavIndicator"
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-gradient-to-b from-indigo-400 to-indigo-600 rounded-r-full shadow-[0_0_20px_rgba(99,102,241,0.8)]" 
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-indigo-400 to-indigo-600 rounded-r-full shadow-[0_0_15px_rgba(99,102,241,0.6)]" 
           />
         )}
-        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl transition-all duration-500 ${
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-all duration-500 ${
           isActive 
-            ? 'bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 text-white scale-110 shadow-[0_10px_30px_rgba(99,102,241,0.5)]' 
-            : 'bg-slate-800/50 text-slate-500 group-hover:bg-slate-700/80 group-hover:text-slate-300 group-hover:scale-105'
+            ? 'bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 text-white shadow-[0_10px_20px_rgba(99,102,241,0.4)]' 
+            : 'bg-slate-800/50 text-slate-500 group-hover:text-slate-300'
         }`}>
           {icon}
         </div>
-        <span className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-500 ${
+        <span className={`text-xs font-bold uppercase tracking-widest transition-colors duration-500 ${
           isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-400'
         }`}>
           {label}
         </span>
-      </button>
+      </motion.button>
     );
   };
 
-  const MobileQuickAction = ({ icon, label, section }: { icon: string, label: string, section: AppSection }) => (
-    <button 
-      onClick={() => setActiveSection(section)}
-      className="flex flex-col items-center gap-1 group"
-    >
-      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl transition-all duration-300 shadow-xl ${
-        activeSection === section 
-          ? 'bg-gradient-to-br from-indigo-500 to-violet-600 text-white scale-110 shadow-indigo-500/40' 
-          : 'bg-slate-800 text-slate-400 group-hover:bg-slate-700'
-      }`}>
-        {icon}
-      </div>
-      <span className={`text-[10px] font-bold uppercase tracking-tighter ${activeSection === section ? 'text-indigo-400' : 'text-slate-500'}`}>{label}</span>
-    </button>
-  );
+
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row relative">
+    <div className="min-h-screen flex flex-col relative">
       <AnimatePresence>
         {isInitialLoading && (
           <motion.div 
@@ -375,41 +378,111 @@ const App: React.FC = () => {
       <div className="fixed top-0 -right-4 w-72 h-72 bg-cyan-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-2000"></div>
       <div className="fixed -bottom-8 left-20 w-72 h-72 bg-rose-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-4000"></div>
 
-      {/* Desktop Left Sidebar Navigation */}
-      <aside className="hidden md:flex fixed left-0 top-0 h-full w-28 bg-slate-950/80 backdrop-blur-2xl border-r border-white/5 flex-col py-8 z-[70] items-center">
-        <div 
-          className="mb-12 cursor-pointer hover:rotate-6 transition-transform"
-          onClick={() => setActiveSection(AppSection.RECOMMENDATIONS)}
-        >
-          <Logo size="md" />
-        </div>
+      {/* Sidebar Navigation Drawer */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsSidebarOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90]"
+            />
+            
+            {/* Drawer */}
+            <motion.aside 
+              initial={{ x: -300 }}
+              animate={{ x: 0 }}
+              exit={{ x: -300 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed left-0 top-0 h-full bg-slate-950/95 backdrop-blur-2xl border-r border-white/5 flex flex-col py-8 z-[100] items-center overflow-hidden w-64"
+            >
+              <div 
+                className="mb-10 cursor-pointer hover:rotate-6 transition-transform flex flex-col items-center"
+                onClick={() => {
+                  setActiveSection(AppSection.RECOMMENDATIONS);
+                  setIsSidebarOpen(false);
+                }}
+              >
+                <Logo size="sm" />
+                <span className="text-[8px] font-black text-white uppercase tracking-[0.2em] mt-2">Zone</span>
+              </div>
 
-        <div className="flex-1 w-full space-y-4">
-          <NavItem icon="🎬" label="Ent" section={AppSection.RECOMMENDATIONS} />
-          <NavItem icon="🎓" label="Career" section={AppSection.ADVICE} />
-          <NavItem icon="💬" label="Chat" section={AppSection.CHAT} />
-        </div>
+              <div className="flex-1 w-full space-y-2 px-4 overflow-y-auto custom-scrollbar">
+                <div onClick={() => setIsSidebarOpen(false)}>
+                  <NavItem icon="🎬" label="Entertainment" section={AppSection.RECOMMENDATIONS} />
+                </div>
+                <div onClick={() => setIsSidebarOpen(false)}>
+                  <NavItem icon="🎓" label="Career Guide" section={AppSection.ADVICE} />
+                </div>
+                <div onClick={() => setIsSidebarOpen(false)}>
+                  <NavItem icon="💬" label="AI Assistant" section={AppSection.CHAT} />
+                </div>
+              </div>
 
-        <div className="mt-auto pt-8 flex flex-col gap-4 items-center">
-          <div className="flex flex-col items-center gap-2 mb-4">
-            <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest [writing-mode:vertical-rl] rotate-180">Developed by</span>
-            <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-tighter [writing-mode:vertical-rl] rotate-180">Dev Baghel</span>
-          </div>
-          <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></div>
-          <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse [animation-delay:0.2s]"></div>
-        </div>
-      </aside>
+              <div className="mt-auto pt-6 pb-8 flex flex-col gap-6 items-center w-full bg-slate-950/50 border-t border-white/5">
+                <motion.button 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    handleLogout();
+                    setIsSidebarOpen(false);
+                  }}
+                  className="w-[80%] py-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 flex items-center justify-center transition-all group gap-2 font-bold text-sm border border-rose-500/20"
+                  title="Logout"
+                >
+                  <span className="text-lg group-hover:rotate-12 transition-transform">🚪</span>
+                  <span>Sign Out</span>
+                </motion.button>
+                
+                <div className="flex flex-col items-center gap-2 px-4 text-center">
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Developed by</span>
+                  <motion.span 
+                    animate={{ color: ['#818cf8', '#6366f1', '#818cf8'] }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                    className="font-black text-indigo-400 uppercase tracking-widest text-xs"
+                  >
+                    Dev Baghel
+                  </motion.span>
+                </div>
+                
+                <div className="flex gap-3">
+                  <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.6)]"></div>
+                  <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse [animation-delay:0.2s] shadow-[0_0_8px_rgba(6,182,212,0.6)]"></div>
+                </div>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
 
-      {/* Main Container Adjustment for Sidebar */}
-      <div className="flex-1 md:pl-28 flex flex-col">
+      {/* Main Container */}
+      <div className="flex-1 flex flex-col min-h-screen">
         {/* Header (Branding & Status Only) */}
         <header className="sticky top-0 z-[60] bg-slate-950/70 backdrop-blur-xl border-b border-white/5">
           <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-            <div className="flex items-center gap-3 md:hidden">
-              <Logo size="sm" />
-              <div className="flex flex-col">
-                <span className="text-lg font-extrabold text-white tracking-tight leading-none">Escape Zone</span>
-                <span className="text-[8px] font-bold text-indigo-400 uppercase tracking-widest">by Dev Baghel</span>
+            <div className="flex items-center gap-4">
+              {/* Sidebar Toggle Button (Three Lines) */}
+              <button 
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="flex w-10 h-10 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all active:scale-90"
+                aria-label="Toggle Menu"
+              >
+                <div className="flex flex-col gap-1.5">
+                  <div className={`w-5 h-0.5 bg-white transition-all ${isSidebarOpen ? 'rotate-45 translate-y-2' : ''}`}></div>
+                  <div className={`w-5 h-0.5 bg-white transition-all ${isSidebarOpen ? 'opacity-0' : ''}`}></div>
+                  <div className={`w-5 h-0.5 bg-white transition-all ${isSidebarOpen ? '-rotate-45 -translate-y-2' : ''}`}></div>
+                </div>
+              </button>
+
+              <div className="flex items-center gap-3">
+                <Logo size="sm" />
+                <div className="flex flex-col">
+                  <span className="text-lg font-extrabold text-white tracking-tight leading-none">Escape Zone</span>
+                  <span className="text-[8px] font-bold text-indigo-400 uppercase tracking-widest">by Dev Baghel</span>
+                </div>
               </div>
             </div>
 
@@ -433,15 +506,8 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        {/* Mobile Floating Bottom Nav */}
-        <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] bg-slate-900/90 backdrop-blur-2xl px-6 py-3 rounded-3xl border border-white/10 shadow-2xl flex items-center gap-8">
-          <MobileQuickAction icon="🎬" label="Ent" section={AppSection.RECOMMENDATIONS} />
-          <MobileQuickAction icon="🎓" label="Career" section={AppSection.ADVICE} />
-          <MobileQuickAction icon="💬" label="Chat" section={AppSection.CHAT} />
-        </div>
-
         {/* Main Content */}
-        <main className="flex-1 container mx-auto px-6 py-10 pb-24 md:pb-10 z-10">
+        <main className="flex-1 container mx-auto px-6 py-10 z-10">
           <AnimatePresence mode="wait">
             {activeSection === AppSection.RECOMMENDATIONS && (
               <motion.div 

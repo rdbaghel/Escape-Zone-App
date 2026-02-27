@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Markdown from 'react-markdown';
 import { geminiService } from '../services/geminiService';
 
 const topics = [
@@ -169,8 +170,8 @@ const AdviceSection: React.FC = () => {
               </div>
 
               <div className="prose prose-invert max-w-none">
-                <div className="whitespace-pre-wrap text-slate-300 leading-relaxed font-medium text-lg antialiased selection:bg-indigo-500/30 p-8 rounded-[2rem] bg-slate-950/30 border border-white/5 shadow-inner">
-                  {adviceContent}
+                <div className="markdown-body text-slate-300 leading-relaxed font-medium text-lg antialiased selection:bg-indigo-500/30 p-8 rounded-[2rem] bg-slate-950/30 border border-white/5 shadow-inner">
+                  <Markdown>{adviceContent || ''}</Markdown>
                 </div>
               </div>
               

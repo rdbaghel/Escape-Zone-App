@@ -4,6 +4,8 @@ import { Recommendation } from "../types";
 
 const MODEL_NAME = 'gemini-3-flash-preview';
 
+const cache = new Map<string, any>();
+
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function withRetry<T>(fn: () => Promise<T>, retries = 3, backoff = 1000): Promise<T> {
@@ -32,6 +34,9 @@ export class GeminiService {
     genre?: string, 
     year?: string
   ): Promise<Recommendation[]> {
+    const cacheKey = `rec_${category}_${query || ''}_${genre || ''}_${year || ''}`;
+    if (cache.has(cacheKey)) return cache.get(cacheKey);
+
     return withRetry(async () => {
       let prompt = `Recommend 6 top-rated ${category}`;
       
@@ -46,7 +51,7 @@ export class GeminiService {
         prompt += " that are trending or classic high-rated hits";
       }
 
-      prompt += ". For each recommendation, provide a high-resolution Unsplash image URL that is visually relevant to the title. For movies and series, look for cinematic stills or thematic photography. For anime, look for vibrant, high-contrast images that match the anime's aesthetic. Ensure the image is high-quality and directly relates to the content's mood and setting. Include IMDb, Rotten Tomatoes ratings, and the release year.";
+      prompt += ". Provide high-quality Unsplash image URLs. Include IMDb, Rotten Tomatoes ratings, and release year.";
 
       const response = await this.ai.models.generateContent({
         model: MODEL_NAME,
@@ -54,6 +59,7 @@ export class GeminiService {
         config: {
           responseMimeType: "application/json",
           thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+          temperature: 0.2, // Lower temperature for faster, more deterministic results
           responseSchema: {
             type: Type.ARRAY,
             items: {
@@ -61,12 +67,12 @@ export class GeminiService {
               properties: {
                 id: { type: Type.STRING },
                 title: { type: Type.STRING },
-                type: { type: Type.STRING, description: 'movie, web-series, or anime' },
+                type: { type: Type.STRING },
                 ratingIMDb: { type: Type.STRING },
                 ratingRottenTomatoes: { type: Type.STRING },
                 description: { type: Type.STRING },
-                imageUrl: { type: Type.STRING, description: 'A high-resolution Unsplash image URL that matches the movie/series/anime theme.' },
-                trailerUrl: { type: Type.STRING, description: 'A valid YouTube embed URL for the official trailer.' },
+                imageUrl: { type: Type.STRING },
+                trailerUrl: { type: Type.STRING },
                 genres: { type: Type.ARRAY, items: { type: Type.STRING } },
                 releaseYear: { type: Type.STRING }
               },
@@ -77,7 +83,9 @@ export class GeminiService {
       });
 
       try {
-        return JSON.parse(response.text || '[]');
+        const results = JSON.parse(response.text || '[]');
+        cache.set(cacheKey, results);
+        return results;
       } catch (e) {
         console.error("Failed to parse recommendations", e);
         return [];
@@ -86,26 +94,53 @@ export class GeminiService {
   }
 
   async getAdvice(topic: string): Promise<string> {
+    const cacheKey = `advice_${topic}`;
+    if (cache.has(cacheKey)) return cache.get(cacheKey);
+
     return withRetry(async () => {
       const response = await this.ai.models.generateContent({
         model: MODEL_NAME,
         contents: `Provide expert advice and a step-by-step roadmap for: ${topic}. Focus on technical fields, learning resources, and study abroad process where applicable. Format in Markdown with clear headings and bullet points.`,
         config: {
-          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
+          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+          temperature: 0.2
         }
       });
-      return response.text || "Sorry, I couldn't generate advice at this time.";
+      const result = response.text || "Sorry, I couldn't generate advice at this time.";
+      cache.set(cacheKey, result);
+      return result;
     });
   }
 
-  async chat(message: string, history: { role: 'user' | 'model', parts: { text: string }[] }[]): Promise<string> {
+  async chat(message: string, history: { role: 'user' | 'model', text: string }[]): Promise<string> {
     return withRetry(async () => {
       const chat = this.ai.chats.create({
         model: MODEL_NAME,
         config: {
-          systemInstruction: "You are Escape Zone, an expert career counselor and entertainment critic. You help users find great movies/anime and provide deep technical career guidance and study abroad advice. Be professional, encouraging, and detailed.",
+          systemInstruction: `You are "Escape Zone Assistant", a highly intelligent, precise, and interactive AI. 
+          Your goal is to provide perfect and precious responses that strictly follow the user's prompt.
+          
+          GUIDELINES:
+          1. ANALYSIS: Carefully analyze the user's intent and specific questions. Do not give generic answers.
+          2. FORMATTING: Always use clean Markdown formatting. Use:
+             - Paragraphs for explanations.
+             - Bullet points or numbered lists for steps, features, or lists.
+             - Bold text for emphasis.
+             - Clear headings (###) for structured responses.
+          3. INTERACTION: Respond with a conversational feel. Acknowledge the user's specific query.
+          4. PRECISION: Follow the exact text or questions asked. If a user asks for a list, give a list. If they ask for a paragraph, give a paragraph.
+          5. EXPERTISE: You are an expert in:
+             - Entertainment (Movies, Anime, TV Shows, Web Series).
+             - Career Guidance (Tech, Engineering, Design, Management).
+             - Study Abroad (University selection, Visa processes, Exams like GRE/TOEFL/IELTS).
+          
+          Be smart, responsive, and ensure your answers are visually structured and easy to read.`,
           thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
-        }
+        },
+        history: history.map(h => ({
+          role: h.role,
+          parts: [{ text: h.text }]
+        }))
       });
 
       const response = await chat.sendMessage({ message });

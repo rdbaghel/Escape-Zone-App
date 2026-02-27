@@ -8,18 +8,29 @@ interface AuthPageProps {
 }
 
 const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
+  const [step, setStep] = useState<'selection' | 'form'>('selection');
+  const [selectedProvider, setSelectedProvider] = useState<string>('');
   const [isLogin, setIsLogin] = useState(true);
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleProviderSelect = (provider: string) => {
+    if (provider === 'Guest') {
+      handleSocialLogin('Guest');
+      return;
+    }
+    setSelectedProvider(provider);
+    setStep('form');
+  };
+
   const handleSocialLogin = async (provider: string) => {
     setIsLoading(true);
     
     const userData = { 
       name: name || 'User', 
-      provider, 
+      provider: provider || selectedProvider, 
       email, 
       phone,
       type: isLogin ? 'Login' : 'Signup'
@@ -92,133 +103,163 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
               <span className="text-white font-black text-2xl">EZ</span>
             </motion.div>
             <h1 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">
-              {isLogin ? 'Welcome Back' : 'Join the Zone'}
+              {step === 'selection' ? 'Identify Yourself' : (isLogin ? 'Welcome Back' : 'Join the Zone')}
             </h1>
             <p className="text-slate-500 text-sm font-medium">
-              {isLogin ? 'Enter your details to access your sanctuary' : 'Create an account to start your journey'}
+              {step === 'selection' 
+                ? 'Choose your preferred platform to continue' 
+                : `Provide your ${selectedProvider} account details`}
             </p>
           </div>
 
           <div className="space-y-6">
-            {/* Auth Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <AnimatePresence mode="wait">
-                {!isLogin && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="relative group"
+            <AnimatePresence mode="wait">
+              {step === 'selection' ? (
+                <motion.div 
+                  key="selection"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="space-y-4"
+                >
+                  <div className="grid grid-cols-1 gap-3">
+                    <button 
+                      onClick={() => handleProviderSelect('Google')}
+                      className="flex items-center gap-4 px-6 py-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl transition-all hover:scale-[1.02] active:scale-98 group"
+                    >
+                      <GoogleIcon />
+                      <span className="font-bold text-slate-700">Continue with Google</span>
+                    </button>
+                    <button 
+                      onClick={() => handleProviderSelect('Apple')}
+                      className="flex items-center gap-4 px-6 py-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl transition-all hover:scale-[1.02] active:scale-98 group"
+                    >
+                      <div className="text-black"><AppleIcon /></div>
+                      <span className="font-bold text-slate-700">Continue with Apple</span>
+                    </button>
+                    <button 
+                      onClick={() => handleProviderSelect('GitHub')}
+                      className="flex items-center gap-4 px-6 py-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl transition-all hover:scale-[1.02] active:scale-98 group"
+                    >
+                      <Github className="w-5 h-5 text-slate-900" />
+                      <span className="font-bold text-slate-700">Continue with GitHub</span>
+                    </button>
+                    <button 
+                      onClick={() => handleProviderSelect('Phone')}
+                      className="flex items-center gap-4 px-6 py-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl transition-all hover:scale-[1.02] active:scale-98 group"
+                    >
+                      <Phone className="w-5 h-5 text-indigo-500" />
+                      <span className="font-bold text-slate-700">Continue with Phone</span>
+                    </button>
+                  </div>
+
+                  <div className="relative py-2">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
+                    <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-black"><span className="bg-white px-4 text-slate-400">Or</span></div>
+                  </div>
+
+                  <button 
+                    onClick={() => handleProviderSelect('Guest')}
+                    className="w-full py-4 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2"
                   >
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
-                      <User className="w-5 h-5" />
+                    <User className="w-4 h-4" />
+                    Explore as Guest
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.div 
+                  key="form"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="space-y-4"
+                >
+                  <button 
+                    onClick={() => setStep('selection')}
+                    className="text-xs font-bold text-indigo-500 hover:text-indigo-600 flex items-center gap-1 mb-2"
+                  >
+                    ← Back to selection
+                  </button>
+                  
+                  {/* Auth Form */}
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <AnimatePresence mode="wait">
+                      {!isLogin && (
+                        <motion.div 
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="relative group"
+                        >
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                            <User className="w-5 h-5" />
+                          </div>
+                          <input 
+                            type="text" 
+                            placeholder="Full Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all"
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                        <Mail className="w-5 h-5" />
+                      </div>
+                      <input 
+                        type="email" 
+                        placeholder={`${selectedProvider} Email Address`}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all"
+                      />
                     </div>
-                    <input 
-                      type="text" 
-                      placeholder="Full Name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all"
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
-                  <Mail className="w-5 h-5" />
-                </div>
-                <input 
-                  type="email" 
-                  placeholder="Email Address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all"
-                />
-              </div>
+                    {selectedProvider === 'Phone' && (
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                          <Phone className="w-5 h-5" />
+                        </div>
+                        <input 
+                          type="tel" 
+                          placeholder="Mobile Number"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all"
+                        />
+                      </div>
+                    )}
 
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
-                  <Phone className="w-5 h-5" />
-                </div>
-                <input 
-                  type="tel" 
-                  placeholder="Mobile Number"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all"
-                />
-              </div>
+                    <button 
+                      type="submit"
+                      disabled={isLoading || (isLogin ? (!phone && !email) : (!name || (!phone && !email)))}
+                      className="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 disabled:opacity-50 disabled:hover:from-indigo-500 disabled:hover:to-violet-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 group"
+                    >
+                      {isLoading ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      ) : (
+                        <>
+                          {isLogin ? `Sign In with ${selectedProvider}` : 'Create Account'}
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </>
+                      )}
+                    </button>
+                  </form>
 
-              <button 
-                type="submit"
-                disabled={isLoading || (isLogin ? (!phone && !email) : (!name || (!phone && !email)))}
-                className="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 disabled:opacity-50 disabled:hover:from-indigo-500 disabled:hover:to-violet-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 group"
-              >
-                {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                ) : (
-                  <>
-                    {isLogin ? 'Sign In' : 'Create Account'}
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="relative py-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-100"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase tracking-widest font-black">
-                <span className="bg-white px-4 text-slate-400">Or continue with</span>
-              </div>
-            </div>
-
-            {/* Social Logins */}
-            <div className="grid grid-cols-3 gap-4">
-              <button 
-                onClick={() => handleSocialLogin('Google')}
-                className="flex items-center justify-center py-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl transition-all hover:scale-105 active:scale-95"
-                title="Google"
-              >
-                <GoogleIcon />
-              </button>
-              <button 
-                onClick={() => handleSocialLogin('Apple')}
-                className="flex items-center justify-center py-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl transition-all hover:scale-105 active:scale-95"
-                title="Apple"
-              >
-                <div className="text-black">
-                  <AppleIcon />
-                </div>
-              </button>
-              <button 
-                onClick={() => handleSocialLogin('GitHub')}
-                className="flex items-center justify-center py-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl transition-all hover:scale-105 active:scale-95 text-slate-900"
-                title="GitHub"
-              >
-                <Github className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Guest Login */}
-            <button 
-              onClick={() => handleSocialLogin('Guest')}
-              className="w-full py-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl text-slate-500 hover:text-slate-900 font-bold text-sm transition-all flex items-center justify-center gap-2"
-            >
-              <User className="w-4 h-4" />
-              Continue as Guest
-            </button>
-          </div>
-
-          <div className="mt-10 text-center">
-            <button 
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-slate-400 hover:text-indigo-600 text-sm font-bold transition-colors"
-            >
-              {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Log In"}
-            </button>
+                  <div className="mt-6 text-center">
+                    <button 
+                      onClick={() => setIsLogin(!isLogin)}
+                      className="text-slate-400 hover:text-indigo-600 text-sm font-bold transition-colors"
+                    >
+                      {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Log In"}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
