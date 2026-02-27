@@ -6,6 +6,7 @@ import { geminiService } from './services/geminiService';
 import RecommendationCard from './components/RecommendationCard';
 import AdviceSection from './components/AdviceSection';
 import ChatInterface from './components/ChatInterface';
+import AuthPage from './components/AuthPage';
 
 const GENRES = ['All', 'Action', 'Comedy', 'Drama', 'Sci-Fi', 'Horror', 'Romance', 'Thriller', 'Animation'];
 const YEARS = ['All', '2025', '2024', '2023', '2022', '2021', '2020', '2010s', '2000s'];
@@ -44,12 +45,19 @@ const App: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    // Extended loading for aesthetic intro sequence
-    const timer = setTimeout(() => setIsInitialLoading(false), 15000);
+    // Extended loading for aesthetic intro sequence - Reduced by 2s as requested
+    const timer = setTimeout(() => setIsInitialLoading(false), 13000);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleLogin = (userData: any) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+  };
 
   const fetchRecommendations = async (cat: string, query?: string, genre?: string, year?: string) => {
     setLoading(true);
@@ -154,8 +162,8 @@ const App: React.FC = () => {
                     initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
                     animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     transition={{ 
-                      delay: 1.5 + (i * 0.25), 
-                      duration: 1.2,
+                      delay: 1.0 + (i * 0.2), 
+                      duration: 1.0,
                       ease: [0.2, 0.65, 0.3, 0.9]
                     }}
                     className={`text-5xl md:text-7xl font-black text-white tracking-tighter inline-block ${char === ' ' ? 'mx-4' : ''}`}
@@ -170,8 +178,8 @@ const App: React.FC = () => {
                 initial={{ scale: 0, opacity: 0, rotate: -20 }}
                 animate={{ scale: 1, opacity: 1, rotate: 0 }}
                 transition={{ 
-                  delay: 6.5, 
-                  duration: 1.5, 
+                  delay: 5.0, 
+                  duration: 1.2, 
                   type: "spring", 
                   damping: 15 
                 }}
@@ -211,10 +219,10 @@ const App: React.FC = () => {
                     translateY: [0, -10, 0]
                   }}
                   transition={{ 
-                    opacity: { delay: 8, duration: 1 },
-                    x: { delay: 8, duration: 1.5, type: "spring" },
-                    y: { delay: 8, duration: 1.5, type: "spring" },
-                    scale: { delay: 8, duration: 1.5, type: "spring" },
+                    opacity: { delay: 6.5, duration: 1 },
+                    x: { delay: 6.5, duration: 1.2, type: "spring" },
+                    y: { delay: 6.5, duration: 1.2, type: "spring" },
+                    scale: { delay: 6.5, duration: 1.2, type: "spring" },
                     translateY: { duration: 3, repeat: Infinity, ease: "easeInOut" }
                   }}
                   className="absolute text-4xl drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] z-20"
@@ -230,10 +238,10 @@ const App: React.FC = () => {
                     translateY: [0, 10, 0]
                   }}
                   transition={{ 
-                    opacity: { delay: 8.3, duration: 1 },
-                    x: { delay: 8.3, duration: 1.5, type: "spring" },
-                    y: { delay: 8.3, duration: 1.5, type: "spring" },
-                    scale: { delay: 8.3, duration: 1.5, type: "spring" },
+                    opacity: { delay: 6.7, duration: 1 },
+                    x: { delay: 6.7, duration: 1.2, type: "spring" },
+                    y: { delay: 6.7, duration: 1.2, type: "spring" },
+                    scale: { delay: 6.7, duration: 1.2, type: "spring" },
                     translateY: { duration: 3.5, repeat: Infinity, ease: "easeInOut" }
                   }}
                   className="absolute text-4xl drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] z-20"
@@ -249,10 +257,10 @@ const App: React.FC = () => {
                     translateY: [0, -15, 0]
                   }}
                   transition={{ 
-                    opacity: { delay: 8.6, duration: 1 },
-                    x: { delay: 8.6, duration: 1.5, type: "spring" },
-                    y: { delay: 8.6, duration: 1.5, type: "spring" },
-                    scale: { delay: 8.6, duration: 1.5, type: "spring" },
+                    opacity: { delay: 6.9, duration: 1 },
+                    x: { delay: 6.9, duration: 1.2, type: "spring" },
+                    y: { delay: 6.9, duration: 1.2, type: "spring" },
+                    scale: { delay: 6.9, duration: 1.2, type: "spring" },
                     translateY: { duration: 4, repeat: Infinity, ease: "easeInOut" }
                   }}
                   className="absolute text-4xl drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] z-20"
@@ -268,10 +276,10 @@ const App: React.FC = () => {
                     translateY: [0, 15, 0]
                   }}
                   transition={{ 
-                    opacity: { delay: 8.9, duration: 1 },
-                    x: { delay: 8.9, duration: 1.5, type: "spring" },
-                    y: { delay: 8.9, duration: 1.5, type: "spring" },
-                    scale: { delay: 8.9, duration: 1.5, type: "spring" },
+                    opacity: { delay: 7.1, duration: 1 },
+                    x: { delay: 7.1, duration: 1.2, type: "spring" },
+                    y: { delay: 7.1, duration: 1.2, type: "spring" },
+                    scale: { delay: 7.1, duration: 1.2, type: "spring" },
                     translateY: { duration: 4.5, repeat: Infinity, ease: "easeInOut" }
                   }}
                   className="absolute text-4xl drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] z-20"
@@ -281,14 +289,14 @@ const App: React.FC = () => {
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 10, duration: 1.5 }}
+                transition={{ delay: 8, duration: 1.5 }}
                 className="mt-16 text-center space-y-4"
               >
                 <div className="flex flex-col items-center gap-2 justify-center">
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 11, duration: 1 }}
+                    transition={{ delay: 8.5, duration: 1 }}
                     className="px-6 py-2 bg-indigo-600/20 border border-indigo-500/30 rounded-full backdrop-blur-md"
                   >
                     <p className="text-indigo-400 text-xs font-black uppercase tracking-[0.4em]">Created by <span className="text-white">Dev Baghel</span></p>
@@ -297,7 +305,7 @@ const App: React.FC = () => {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 12, duration: 1.5, type: "spring" }}
+                    transition={{ delay: 9, duration: 1.5, type: "spring" }}
                     className="relative"
                   >
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 font-serif italic text-2xl tracking-widest">for Cinephile</span>
@@ -313,7 +321,7 @@ const App: React.FC = () => {
                   <motion.div 
                     initial={{ x: "-100%" }}
                     animate={{ x: "100%" }}
-                    transition={{ delay: 10, duration: 5, ease: "easeInOut" }}
+                    transition={{ delay: 8, duration: 5, ease: "easeInOut" }}
                     className="w-full h-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent"
                   />
                 </div>
@@ -345,7 +353,24 @@ const App: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Background Orbs */}
+      <AnimatePresence mode="wait">
+        {!isInitialLoading && !isAuthenticated && (
+          <motion.div
+            key="auth"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+            className="fixed inset-0 z-[90]"
+          >
+            <AuthPage onLogin={handleLogin} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {!isInitialLoading && isAuthenticated && (
+        <>
+          {/* Background Orbs */}
       <div className="fixed top-0 -left-4 w-72 h-72 bg-indigo-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob"></div>
       <div className="fixed top-0 -right-4 w-72 h-72 bg-cyan-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-2000"></div>
       <div className="fixed -bottom-8 left-20 w-72 h-72 bg-rose-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-4000"></div>
@@ -647,8 +672,10 @@ const App: React.FC = () => {
           </div>
         </footer>
       </div>
-    </div>
-  );
+    </>
+  )}
+</div>
+);
 };
 
 export default App;
